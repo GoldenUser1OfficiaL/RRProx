@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>U</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; font-family:'Courier New',monospace; overflow:hidden; }
+body {
+  background: linear-gradient(to top, #001f3f 0%, #004080 100%);
+  position: relative; color: #fff;
+}
+.bubbles-container { position:absolute; width:100%; height:100%; overflow:hidden; z-index:1; }
+.bubble { position:absolute; border-radius:50%; background: rgba(255,255,255,0.6);
+  pointer-events:auto; cursor:pointer; animation-name: rise;
+  animation-timing-function: linear; animation-iteration-count: 1; }
+@keyframes rise { 
+  0% { transform: translateY(0); opacity:0; } 
+  10% { opacity:0.6; } 
+  90% { opacity:0.6; } 
+  100% { transform: translateY(-100vh); opacity:0; } 
+}
+
+/* Scrollable sidebar */
+.sidebar { 
+  position:absolute; top:0; left:0; width:220px; height:100%; 
+  background:rgba(0,0,50,0.85); padding:20px; 
+  display:flex; flex-direction:column; 
+  border-right:1px solid #00ffff; z-index:10; 
+  overflow-y:auto; /* 👈 makes sidebar scrollable */
+  scrollbar-width: thin; 
+  scrollbar-color: #00ffff #001f3f; 
+}
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #00ffff;
+  border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background-color: #001f3f;
+}
+
+.menu-item { font-size:22px; margin-bottom:10px; cursor:pointer; position:relative; color:#fff; user-select:none; padding-left:6px; }
+.menu-item:hover { color:#00ffff; }
+.menu-links, .credits-note { margin-top:10px; display:none; flex-direction:column; gap:8px; padding-left:20px; font-size:14px; color:#fff; }
+.menu-links a { text-decoration:none; display:block; color:#fff; }
+.menu-links a:hover { text-decoration:underline; color:#00ffff; }
+
+/* Updates and News Button */
+#updatesButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 16px;
+  background: rgba(0,255,255,0.1);
+  border: 1px solid #00ffff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
+  color: #00ffff;
+  z-index: 15;
+  transition: 0.3s;
+}
+#updatesButton:hover {
+  background: rgba(0,255,255,0.3);
+  transform: scale(1.1);
+}
+
+/* Modal Window */
+#updatesModal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none; justify-content: center; align-items: center;
+  z-index: 999;
+}
+.modal-content {
+  background: rgba(0,0,40,0.95);
+  border: 1px solid #00ffff;
+  border-radius: 12px;
+  padding: 20px 25px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 0 20px #00ffff;
+  color: #00ffff;
+  animation: fadeIn 0.4s ease;
+}
+.modal-content h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+.modal-content p {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #b3faff;
+}
+.close-btn {
+  display: block;
+  margin: 10px auto 0;
+  background: rgba(0,255,255,0.15);
+  border: 1px solid #00ffff;
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: #00ffff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.close-btn:hover {
+  background: rgba(0,255,255,0.4);
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#infoPanel {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  padding: 15px 20px;
+  background: rgba(0,0,0,0.8);
+  color: #00ffff;
+  font-family: monospace;
+  font-size: 14px;
+  border: 1px solid #00ffff;
+  border-radius: 8px;
+  z-index: 999;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="bubbles-container" id="bubblesContainer"></div>
+
+<!-- Updates and News Button -->
+<div id="updatesButton">📰 Updates & News</div>
+
+<!-- Updates Modal -->
+<div id="updatesModal">
+  <div class="modal-content">
+    <h2>🌀 Latest Updates</h2>
+    <p><b>October 20 2025:</b> released</p>
+    <p><b>News:</b> released!</p>
+    <p><b>Coming soon:</b></p>
+    <button class="close-btn">Close</button>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="menu-item" data-id="games">Games</div>
+  <div class="menu-links" id="gamesList">
+    <a href="https://reading-old.q13x.com/" target="_blank">Minecraft 1.5.2</a>
+    <a href="https://openprocessing.org/sketch/2494133" target="_blank">1v1.LOL</a>
+    <a href="https://writingessayepicguide.lol/en_US/" target="_blank">Nebula</a>
+    <a href="https://www.www.www.www.152-53-18-128.ip.addr.tools/#home" target="_blank">UniUB</a>
+    <a href="https://openprocessing.org/sketch/2757992" target="_blank">Nintendo DS Emulator</a>
+    <a href="https://geometry-games.online/games.html" target="_blank">Geometry Games</a>
+    <a href="https://scratch.mit.edu/users/GoldenUser1/" target="_blank">Scratch</a>
+    <a href="http://neal.fun" target="_blank">Neal.fun</a>
+    <a href="https://nb-ga.github.io/games-site/" target="_blank">All Games</a>
+    <a href="https://poki.com/en/g/crossy-road" target="_blank">Poki</a>
+    <a href="https://goht.happytracing.com/games/" target="_blank">Goht</a>
+    <a href="https://games.kidzsearch.com/computer/" target="_blank">KidzSearch</a>
+    <a href="https://sites.google.com/selmausd.org/epikgamingsite/bacon-may-die" target="_blank">Epikgamingsite</a>
+    <a href="https://www.tynker.com/dashboard/student/#/minecraft/featured/bedrock" target="_blank">Tynker</a>
+  </div>
+
+  <div class="menu-item" data-id="apps">Apps</div>
+  <div class="menu-links" id="appsList">
+    <a href="https://www.bing.com/" target="_blank">Bing</a>
+    <a href="https://www.google.com/?safe=active" target="_blank">Google</a>
+    <a href="https://www.yahoo.com/" target="_blank">Yahoo</a>
+    <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank">Gmail</a>
+    <a href="https://drive.google.com/drive/home" target="_blank">Google Drive</a>
+  </div>
+
+  <div class="menu-item" data-id="social">My Social Media</div>
+  <div class="menu-links" id="socialList">
+    <a href="https://discord.gg/27EMUEsvZJ" target="_blank">Discord</a>
+    <a href="https://www.youtube.com/@GoldenUser1.Official" target="_blank">YouTube</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdNE6gtc1sMI8h_iPl11y8bzVOHygLBnTKQVDmH5eNz5JiyLA/viewform" target="_blank">Link request</a>
+  </div>
+
+  <div class="menu-item" data-id="credits">Credits</div>
+  <div class="credits-note" id="creditsNote">
+    Credits to @Mario_GUY_2 for giving the prox a name, and @GoldenUser1 for design and links.
+  </div>
+</div>
+
+<div id="infoPanel">
+  <p>Storage of this website: <span id="storageInfo"></span></p>
+  <p>FPS: <span id="fpsInfo"></span></p>
+  <p>Ping: <span id="pingInfo"></span></p>
+</div>
+
+<script>
+// Sidebar toggle
+document.querySelectorAll('.menu-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const id = item.dataset.id;
+    if (id === 'credits') {
+      const note = document.getElementById('creditsNote');
+      note.style.display = note.style.display === 'block' ? 'none' : 'block';
+    } else {
+      const list = document.getElementById(id + 'List');
+      list.style.display = list.style.display === 'flex' ? 'none' : 'flex';
+    }
+  });
+});
+
+// Bubbles
+const container = document.getElementById('bubblesContainer');
+function createBubble(x, y, size) {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  size = size || Math.random() * 25 + 10;
+  bubble.style.width = bubble.style.height = `${size}px`;
+  const rect = container.getBoundingClientRect();
+  bubble.style.left = x !== undefined ? `${x - rect.left}px` : `${Math.random() * 100}vw`;
+  bubble.style.top = y !== undefined ? `${y - rect.top}px` : `${Math.random() * 100}vh`;
+  bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+  container.appendChild(bubble);
+  bubble.addEventListener('animationend', () => bubble.remove());
+  bubble.addEventListener('click', () => {
+    const rect = bubble.getBoundingClientRect();
+    bubble.remove();
+    const count = Math.floor(Math.random() * 3) + 2;
+    for (let i = 0; i < count; i++) {
+      createBubble(rect.left + (Math.random() * 30 - 15), rect.top + (Math.random() * 30 - 15), Math.max(size / 2, 5));
+    }
+  });
+}
+setInterval(() => createBubble(), 400);
+
+// FPS counter
+let lastFrame = performance.now();
+function updateFPS() {
+  const now = performance.now();
+  const fps = Math.round(1000 / (now - lastFrame));
+  lastFrame = now;
+  document.getElementById('fpsInfo').textContent = fps;
+  requestAnimationFrame(updateFPS);
+}
+updateFPS();
+
+// Storage usage
+function getStorageUsage() {
+  try {
+    let totalBytes = 0;
+    for (let key in localStorage) {
+      if (!localStorage.hasOwnProperty(key)) continue;
+      const item = localStorage.getItem(key);
+      totalBytes += key.length + item.length;
+    }
+    let size = totalBytes / 1024 / 1024;
+    let unit = 'MB';
+    if (size > 1024) { size /= 1024; unit = 'GB'; }
+    if (size > 1024) { size /= 1024; unit = 'TB'; }
+    document.getElementById('storageInfo').textContent = size.toFixed(2) + ' ' + unit;
+  } catch {
+    document.getElementById('storageInfo').textContent = 'N/A';
+  }
+}
+
+// Ping
+function getPing() {
+  const start = performance.now();
+  fetch(window.location.href, { method: 'HEAD', cache: 'no-store' }).then(() => {
+    const end = performance.now();
+    document.getElementById('pingInfo').textContent = Math.round(end - start) + ' ms';
+  }).catch(() => {
+    document.getElementById('pingInfo').textContent = 'N/A';
+  });
+}
+
+// Info panel (right-click)
+const infoPanel = document.getElementById('infoPanel');
+let panelVisible = false;
+document.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  panelVisible = !panelVisible;
+  infoPanel.style.display = panelVisible ? 'block' : 'none';
+  if (panelVisible) {
+    infoPanel.style.left = e.clientX + 'px';
+    infoPanel.style.top = e.clientY + 'px';
+    getStorageUsage();
+    getPing();
+  }
+});
+
+// Updates Modal
+const modal = document.getElementById('updatesModal');
+document.getElementById('updatesButton').addEventListener('click', () => {
+  modal.style.display = 'flex';
+});
+document.querySelector('.close-btn').addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+</script>
+</body>
+</html>
